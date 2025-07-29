@@ -74,12 +74,12 @@ const getResiTracking = (number, csrf, timers) =>
     try {
       const postData = `viewstate=${csrf.viewstate}&secret_key=${csrf.secret_key}&e=JET&noresi=${number}&timers=${timers}`;
       const getResponse = await axios.post(
-        `https://apic.cekresi.com/cekresi/resi/initialize.php?ui=dad9643acec71f85853608db54345ada&p=1&w=chfj6h`,
+        `https://apa2.cekresi.com/cekresi/resi/initialize.php?ui=dad9643acec71f85853608db54345ada&p=1&w=chfj6h`,
         postData,
         {
           method: "POST",
           headers: {
-            Host: "apic.cekresi.com",
+            Host: "apa2.cekresi.com",
             "User-Agent":
               "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0",
             Accept: "*/*",

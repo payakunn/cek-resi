@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
     for (const nomorResi of daftarResi) {
       try {
         // 🔍 Panggil API dengan Key
-        const url = `https://api.cekresi.com/v1/track?awb=${nomorResi}&api_key=${API_KEY}`;
+        const url = https://api.cekresi.com/v1/track/${nomorResi}?api_key=${API_KEY};
         const resApi = await fetch(url);
         const data = await resApi.json();
 

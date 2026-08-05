@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
       return res.json({
         method: "sendMessage",
         chat_id: chatId,
-        text: "👋 Halo! Selamat datang di Cek Resi Tracker Bot\n\nBot ini membantu kamu melacak resi secara langsung.\n\n🔍 Cara Penggunaan:\n• Kirim nomor resi untuk tracking detail\n• Kirim beberapa resi (pisahkan dengan koma/enter) untuk detail per resi\n\n📌 Contoh:\n123\n123, 456\n\n📦 Info yang Ditampilkan:\n• Status pengiriman (Bahasa Indonesia)\n• Info COD (Ya/Tidak)\n• Asal & Tujuan\n• Riwayat tracking terbaru\n\nAda yang bisa saya bantu?"
+        text: "👋 Halo! Selamat datang di Cek Resi Tracker Bot\n\nBot ini membantu kamu melacak resi secara langsung.\n\n🔍 Cara Penggunaan:\n• Kirim nomor resi untuk tracking detail\n• Kirim beberapa resi (pisahkan dengan koma/enter) untuk detail per resi\n\n📌 Contoh:\n123\n123, 456\n\nAda yang bisa saya bantu?"
       });
     }
 
@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
 
         if (data.success === true && data.data) {
           const info = data.data;
-          const ekspedisi = info.courier?.toUpperCase() || "-";
+          const ekspedisi = (info.courier || "").toUpperCase() || "-";
           const statusKirim = info.status || "Sedang Diproses";
           const layanan = info.service || "NONCOD";
           const infoCOD = info.cod ? "Ya" : "Tidak";

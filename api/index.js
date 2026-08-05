@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 // 🔑 TOKEN BOT KAKAK
 const TOKEN = "8882518836:AAHXM2HhRUzdfWg2l-4GLmCEF9bZpJnSR88";
-const API_CEK_RESI = "https://cek-resi-liard.vercel.app/cek-resi/";
+const API_CEK_RESI = "https://cek-resi.vercel.app/cek-resi/";
 
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");

@@ -1,8 +1,8 @@
 const fetch = require('node-fetch');
 
-// 🔑 TOKEN BOT KAKAK
+// 🔑 DATA BOT & API
 const TOKEN = "8882518836:AAHXM2HhRUzdfWg2l-4GLmCEF9bZpJnSR88";
-const API_CEK_RESI = "https://cek-resi.vercel.app/cek-resi/";
+const API_KEY = "61acc933-f477-4982-ac7e-5061fb306a44";
 
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -23,66 +23,74 @@ module.exports = async (req, res) => {
       });
     }
 
-    // 📦 Cek Resi
-    if (/^[0-9, \n]+$/.test(teks)) {
-      const daftarResi = teks.split(/[\n,]+/).map(r => r.trim()).filter(r => r && /^[0-9]+$/.test(r));
-      
-      for (const nomorResi of daftarResi) {
-        try {
-          const data = await (await fetch(API_CEK_RESI + nomorResi)).then(r => r.json());
+    // 📦 Proses Cek Resi
+    const daftarResi = teks.split(/[\n,;]+/).map(r => r.trim()).filter(r => r && /^[0-9a-zA-Z]+$/.test(r));
+    
+    if (daftarResi.length === 0) return res.status(200).json({ ok: true });
 
-          if (data && data.status === 200 && data.data && data.data.valid) {
-            const info = data.data;
-            const jenisLayanan = (info.serviceType || info.service || "NONCOD").toUpperCase();
-            const infoCOD = jenisLayanan.includes("COD") ? "Ya" : "Tidak";
-            const asal = info.pengirim?.alamatLengkap || info.pengirim?.kota || "-";
-            const tujuan = info.penerima?.alamatLengkap || info.penerima?.kota || "-";
-            const statusKirim = info.status || "Sedang Diproses";
+    for (const nomorResi of daftarResi) {
+      try {
+        // 🔍 Panggil API dengan Key
+        const url = `https://api.cekresi.com/v1/track?awb=${nomorResi}&api_key=${API_KEY}`;
+        const resApi = await fetch(url);
+        const data = await resApi.json();
 
-            let balasan = "";
-            balasan += `📦 EXPEDISI : ${info.expedisi || "J&T"}\n`;
-            balasan += `└ ${info.layanan || "REGULER"}\n\n`;
-            balasan += `📩 Resi\n`;
-            balasan += `├ Service : ${jenisLayanan}\n`;
-            balasan += `└ No Resi : ${nomorResi}\n\n`;
-            balasan += `📮 Status\n`;
-            balasan += `└ Status : ${statusKirim}\n\n`;
-            balasan += `🚀 Pengirim\n`;
-            balasan += `├ ${info.pengirim?.nama || "-"}\n`;
-            balasan += `└ ${asal}\n\n`;
-            balasan += `🚩 Penerima\n`;
-            balasan += `├ ${info.penerima?.nama || "-"}\n`;
-            balasan += `└ ${tujuan}\n\n`;
-            balasan += `⏩ POD Detail\n`;
-            
-            if (info.perjalanan && info.perjalanan.length > 0) {
-              info.perjalanan.forEach((item, i) => {
-                balasan += `${i+1}. ${item.tanggal || ""}\n   ${item.keterangan || ""}\n`;
-              });
-            } else {
-              balasan += `Belum ada riwayat perjalanan\n`;
-            }
-            balasan += `\n💡 Info COD : ${infoCOD}`;
+        if (data.success === true && data.data) {
+          const info = data.data;
+          const ekspedisi = info.courier?.toUpperCase() || "-";
+          const statusKirim = info.status || "Sedang Diproses";
+          const layanan = info.service || "NONCOD";
+          const infoCOD = info.cod ? "Ya" : "Tidak";
+          const pengirimNama = info.origin?.name || "-";
+          const pengirimAlamat = info.origin?.address || "-";
+          const penerimaNama = info.destination?.name || "-";
+          const penerimaAlamat = info.destination?.address || "-";
 
-            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, text: balasan })
+          // 📩 Format Tampilan
+          let balasan = "";
+          balasan += `📦 EXPEDISI : ${ekspedisi}\n`;
+          balasan += `└ ${layanan}\n\n`;
+          balasan += `📩 Resi\n`;
+          balasan += `├ Service : ${layanan}\n`;
+          balasan += `└ No Resi : ${nomorResi}\n\n`;
+          balasan += `📮 Status\n`;
+          balasan += `└ Status : ${statusKirim}\n\n`;
+          balasan += `🚀 Pengirim\n`;
+          balasan += `├ ${pengirimNama}\n`;
+          balasan += `└ ${pengirimAlamat}\n\n`;
+          balasan += `🚩 Penerima\n`;
+          balasan += `├ ${penerimaNama}\n`;
+          balasan += `└ ${penerimaAlamat}\n\n`;
+          balasan += `⏩ POD Detail\n`;
+
+          if (info.history && info.history.length > 0) {
+            info.history.forEach((item, i) => {
+              balasan += `${i+1}. ${item.date || ""}\n   ${item.desc || ""}\n`;
             });
           } else {
-            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ chat_id: chatId, text: `❌ Resi: ${nomorResi}\nResi tidak ditemukan. Pastikan nomor resi benar ya!` })
-            });
+            balasan += `Belum ada riwayat perjalanan\n`;
           }
-        } catch {
+          balasan += `\n💡 Info COD : ${infoCOD}`;
+
           await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: chatId, text: `⚠️ Resi: ${nomorResi}\nSedang gangguan, silakan coba lagi sebentar!` })
+            body: JSON.stringify({ chat_id: chatId, text: balasan })
+          });
+
+        } else {
+          await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: chatId, text: `❌ Resi: ${nomorResi}\nResi tidak ditemukan atau salah!` })
           });
         }
+      } catch {
+        await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, text: `⚠️ Resi: ${nomorResi}\nSedang gangguan, silakan coba lagi sebentar!` })
+        });
       }
     }
 

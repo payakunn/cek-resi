@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 // 🔑 GANTI DENGAN TOKEN BOT KAKAK DARI @BotFather
-const TOKEN = "8472993919:AAFapnIu0BdDzj74YVEQbISUUDmbtSe2cxA";
+const TOKEN = "8882518836:AAHXM2HhRUzdfWg2l-4GLmCEF9bZpJnSR88";
 
 // 🌐 Alamat API Cek Resi Kakak
 const API_CEK_RESI = "https://cek-resi-liard.vercel.app/cek-resi/";
